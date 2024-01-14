@@ -3,7 +3,7 @@ on:
   pull_request:
   push:
     branches:
-      -main #Чтобы случайно не запушили в main ломанного
+      - main #Чтобы случайно не запушили в main ломанного
 
 jobs: 
   code:
@@ -11,32 +11,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps: 
-      - name: checkout
+    - name: checkout
       uses: actions/checkout@v3
 
-      - name: use node 18
+    - name: use node 18
       uses: actions/setup-node@v3
       with:
         node-version: 18
 
       #corepack для установки менеджера пакетов из package.json
-      - name: enable corepack
+    - name: enable corepack
       run: corepack enable
 
-      - name: setup pnpm
+    - name: setup pnpm
       uses: pnpm/action-setup@v2
       #пока без установки зависимостей
       with:
         run_install: false
 
       #кэш, чтобы при одних и тех же зависимостях не переустанавливалось
-      - name: get pnpm store directory
+    - name: get pnpm store directory
       id: pnpm-cache
       shell: bash
       run: |
         echo "STORE_PATH=#{pnpm store path}" >> $GITHUB_OUTPUT
 
-      - name: setup pnpm cache
+    - name: setup pnpm cache
       uses: actions/cache@v3
       with:
         path: ${{ steps.pnpm-cache.outputs.STORE_PATH}}
@@ -44,8 +44,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
 
-      - name: install dep
+    - name: install dep
       run: pnpm install
 
-      - name: lint
+    - name: lint
       run: pnpm run lint
