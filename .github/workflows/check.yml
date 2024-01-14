@@ -1,0 +1,51 @@
+name: check
+on: 
+  pull_request:
+  push:
+    branches:
+      - main #Чтобы случайно не запушили в main ломанного
+
+jobs: 
+  code:
+    name: check code
+    runs-on: ubuntu-latest
+
+    steps: 
+    - name: checkout
+      uses: actions/checkout@v3
+
+    - name: use node 18
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+      #corepack для установки менеджера пакетов из package.json
+    - name: enable corepack
+      run: corepack enable
+
+    - name: setup pnpm
+      uses: pnpm/action-setup@v2
+      #пока без установки зависимостей
+      with:
+        run_install: false
+
+      #кэш, чтобы при одних и тех же зависимостях не переустанавливалось
+    - name: get pnpm store directory
+      id: pnpm-cache
+      shell: bash
+      run: |
+        echo "STORE_PATH=#{pnpm store path}" >> $GITHUB_OUTPUT
+
+    - name: setup pnpm cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH}}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml')}}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: install dep
+      run: pnpm install
+
+    - name: lint
+      run: pnpm run lint
